@@ -1,11 +1,14 @@
 version: '3'
 services:
   data_builder:
-    image: data_builder
+    image: trufi-pbf-extractor
+    container_name: trufi-pbf-extractor
     build: .
-    # command: tail -F anything
+    env_file:
+      - .env
     environment:
-      - bbox=-78.669528,-0.416925,-77.958163,0.504543
-      - geofabrik_url_path=/south-america/ecuador-latest.osm.pbf
+      - CITY_NAME=${CITY_NAME}
+      - BBOX=${BBOX}
+      - GEOFABRIK_URL_PATH=${GEOFABRIK_URL_PATH}
     volumes:
       - ./data:/app/out

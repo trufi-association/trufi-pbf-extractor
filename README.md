@@ -1,54 +1,129 @@
+# Trufi PBF Extractor
 
-## INTRODUCTION
+Extract OpenStreetMap PBF sub-regions from country-level data using a bounding box.
 
-In some places, no sub-regions exist. Trufi’s PBF Extractor tool will allow you to view, extract, and create sub-regions. You can use our tool and follow the process below to build your map.
+## Requirements
 
+- [Docker](https://www.docker.com/) and Docker Compose
 
-## IMPORTANT INFORMATION
+## Quick Start
 
-To complete this process, you must understand the following tools: Geofabrik, Docker, Boundingbox, and Open Trip Planner. 
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/trufi-association/trufi-pbf-extractor.git
+   cd trufi-pbf-extractor
+   ```
 
-Redhat.com explains that **BPF maps** are generic data structures consisting of key/value pairs.
-These value pairs allow you to build a map. 
+2. **Create your configuration**
+   ```bash
+   cp .env.example .env
+   ```
 
-**Geofabrik** is a map of the world that you can view and extract sub-regions from.   
+3. **Edit `.env`** with your city's values (see Configuration section below)
 
-**Boundingbox** is a tool that allows users to select certain geographical areas and coordinates to create maps and sub-regions. 
+4. **Run the extractor**
+   ```bash
+   docker-compose up --build
+   ```
 
-**Docker** describes itself as an open platform for developing, shipping, and running applications.
+5. **Find your output** in `./data/<city_name>.osm.pbf`
 
-**Open Trip Planner** describes itself as a family of open-source software projects that provides passenger information and transportation network analysis services.
+## Configuration
 
+Edit the `.env` file with these variables:
 
-### STEPS
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `CITY_NAME` | Name for the output file | `kigali` |
+| `BBOX` | Bounding box (west,south,east,north) | `29.979526,-2.079821,30.27987,-1.779581` |
+| `GEOFABRIK_URL_PATH` | Path to country PBF on Geofabrik | `/africa/rwanda-latest.osm.pbf` |
 
-+ **Step 1**: Download [Trufi’s PBF Extractor Tool](https://github.com/trufi-association/trufi-pbf-extractor).
- 
-+ **Step 2**: Download [Docker]( https://www.docker.com/) and [Bounding Box]( https://boundingbox.klokantech.com/).
- 
-+ **Step 3**: Navigate to your editor. Open it. Paste the Trufi folder inside the new project.
+### How to get the values
 
-+ **Step 4**: Create a folder for the city you will generate a map for. 
-This is where you will later put your completed map. 
+**Bounding Box:**
+1. Go to [boundingbox.klokantech.com](https://boundingbox.klokantech.com/)
+2. Navigate to your city and draw a box around the area you want
+3. Select "CSV" format at the bottom
+4. Copy the coordinates (format: west,south,east,north)
 
-+ **Step 5**: Navigate to boundingbox.klokantech.com. Adjust the box to capture all the routes you want to include in your map. 
+**Geofabrik URL Path:**
+1. Go to [download.geofabrik.de](https://download.geofabrik.de/)
+2. Navigate to your continent → country
+3. Copy the path after `download.geofabrik.de` (e.g., `/africa/rwanda-latest.osm.pbf`)
 
-+ **Step 6**: In the bounding box bash, paste the coordinates. Be sure to separate them by commas.
+## Example Configurations
 
-+ **Step 7**: In the [Geofabrik]( https://www.geofabrik.de/) URL, type the correct continent and country name.
+### Kigali, Rwanda
+```env
+CITY_NAME=kigali
+BBOX=29.979526,-2.079821,30.27987,-1.779581
+GEOFABRIK_URL_PATH=/africa/rwanda-latest.osm.pbf
+```
 
-+ **Step 8**: Run Docker. The instructions to run the app can be found [here.](https://docs.docker.com/get-started/run-your-own-container/)
- 
-+ **Step 9**:  To check whether or not Docker is running type _docker ps_ in the terminal.
+### Quito, Ecuador
+```env
+CITY_NAME=quito
+BBOX=-78.669528,-0.416925,-77.958163,0.504543
+GEOFABRIK_URL_PATH=/south-america/ecuador-latest.osm.pbf
+```
 
-Note: if the program is running and there are errors, this is likely where you will see them.
- 
-+ **Step 10**: Type Docker compose up. This command actually runs the script.
+### Cochabamba, Bolivia
+```env
+CITY_NAME=cochabamba
+BBOX=-66.227,-17.478,-66.086,-17.329
+GEOFABRIK_URL_PATH=/south-america/bolivia-latest.osm.pbf
+```
 
+## Output
 
-### Optional Step
- 
-To view your data, open the [JOSM editor](https://josm.openstreetmap.de/wiki/Download) app.
-- [ ] Upload your pbf file. View your content.
+The extracted PBF file will be saved to:
+```
+./data/<CITY_NAME>.osm.pbf
+```
 
-Note: This may only work for cities because country files are large.
+You can use this file with:
+- [OpenTripPlanner](https://www.opentripplanner.org/) for transit routing
+- [JOSM](https://josm.openstreetmap.de/) for viewing/editing
+- Other OSM-compatible tools
+
+## Troubleshooting
+
+### Docker is not running
+```bash
+# Check if Docker is running
+docker ps
+
+# Start Docker Desktop or the Docker daemon
+```
+
+### Permission denied on data folder
+```bash
+# Create the data folder with proper permissions
+mkdir -p data
+chmod 755 data
+```
+
+### Download fails
+- Check your internet connection
+- Verify the Geofabrik URL path is correct at [download.geofabrik.de](https://download.geofabrik.de/)
+
+### Empty or very small output file
+- Verify your bounding box coordinates are correct
+- Make sure west < east and south < north
+- Check that your bbox is within the country boundaries
+
+## How It Works
+
+1. Downloads the country-level PBF from Geofabrik
+2. Uses [osmium-tool](https://osmcode.org/osmium-tool/) to extract the specified bounding box
+3. Saves the result to the mounted data volume
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+## Credits
+
+- [Trufi Association](https://www.trufi-association.org/)
+- [Geofabrik](https://www.geofabrik.de/) for OpenStreetMap extracts
+- [osmium-tool](https://osmcode.org/osmium-tool/) for PBF processing
