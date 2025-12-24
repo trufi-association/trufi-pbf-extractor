@@ -1,4 +1,3 @@
-version: '3'
 services:
   data_builder:
     image: trufi-pbf-extractor
@@ -6,9 +5,5 @@ services:
     build: .
     env_file:
       - .env
-    environment:
-      - CITY_NAME=${CITY_NAME}
-      - BBOX=${BBOX}
-      - GEOFABRIK_URL_PATH=${GEOFABRIK_URL_PATH}
     volumes:
       - ./data:/app/out

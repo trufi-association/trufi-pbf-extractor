@@ -9,17 +9,11 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         osmium-tool \
         wget \
-        unzip \
         ca-certificates && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-
-RUN wget -q https://osmdata.openstreetmap.de/download/water-polygons-split-4326.zip && \
-    unzip water-polygons-split-4326.zip && \
-    mv water-polygons-split-4326 coastline && \
-    rm water-polygons-split-4326.zip
 
 COPY ./run.sh ./run.sh
 RUN chmod +x ./run.sh
